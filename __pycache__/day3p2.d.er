@@ -1,8 +1,0 @@
-##[pylyzer] failed /users/matt/projects/advent-of-code/day3p2.py 1733707583 1056
-.file: {"day3_input.txt"}
-
-.sum: {0}
-.mul_count: {0}
-.eval_mul_command: |Type_6794 <: Structural({.__contains__ = (self: Never, R) -> Bool and (self: Never, R) -> Bool; .split = (self: Obj, Type_6829) -> Self}), Type_6829 :> {")"}, R :> {"("}, Self <: Indexable(K, V), K :> {0}, V <: Str|(memory_to_eval: Type_6794) -> NoneType
-
-
