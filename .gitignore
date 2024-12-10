@@ -1,3 +1,6 @@
 .git/
 playgroun.py
 __pycache__
+.*
+.gitignore
+day6*
