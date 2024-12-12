@@ -3,96 +3,118 @@ import time
 # record start time
 start = time.time()
 
+# file = "Inputs/day6_example.txt"
 file = "Inputs/day6_input.txt"
 with open(file, 'r') as file:
     matrix = []
     for line in file:
-        matrix.append(list(line)[:-1])
+        matrix.append(list(line))
 
 df = pd.DataFrame(data=matrix)
+df = df.iloc[:,:-1]
 
+nrows, ncols = df.shape
 r, c = None, None
 direction = None
 
 # Find the start
-for col in df.columns.to_list():
-    try:
-        ix = df.index[df[col].isin(["^", ">", "<", "V"])].values[0]
-        r, c = ix, col
-        direction = df.loc[r, c]
-        break
-    except:
-        continue
-start_pos = [r, c]
+for ix, row in df.iterrows():
+    for col, r in enumerate(row):
+        if r in ["^", ">", "<", "V"]:
+            current_pos = [ix, col]
+            direction = r
 
-# Move, up/left and down/right are the same since I
-# pass a series (row/col depending on dir)
-def move(direction, start, series, end):
-    # only need to pass series to determine how far to move
-    if direction == '^' or direction == "<":
-        ix = start[0]
-        barrier = False
-        while (ix in range(series.shape[0])) and (barrier != "#"):
-            barrier = series[ix - 1]
-            ix -= 1
-            if ix == 0 or ix == (len(series) - 1):
-                end = True
-        return ix + 1, end
 
-    if direction == ">" or direction == "V":
-        ix = start[1]
-        barrier = False
-        while (ix in range(series.shape[0])) and (barrier != "#"):
-            barrier = series[ix + 1]
-            ix -= 1
-            if ix == 0 or ix == (len(series) - 1):
-                end = True
-        return ix + 1, end
+def check_in_bounds(current_pos, direction):
+    r, c = current_pos
+    if r == 0 and direction == '^':
+        return False
+    elif r == nrows and direction == 'V':
+        return False
+    elif c == 0 and direction == '<':
+        return False
+    elif c == ncols and direction == '>':
+        return False
+    else:
+        return True
 
+def change_dir(direction):
+    if direction == '^':
+        return '>'
+    elif direction == '>':
+        return 'V'
+    elif direction == 'V':
+        return '<'
+    elif direction == '<':
+        return '^'
+    else:
+        return 0
 
 end = False
-positions = [[r, c, direction]]
+positions = [current_pos]
+while check_in_bounds(current_pos, direction) and not end:
+    r, c = current_pos
 
-while not end:
-    if direction == "^" and not end:
-        r, end = move("^", [r,c], df[c], end)
-        direction = ">"
-        positions.append([r, c, direction])
-    if direction == ">" and not end:
-        c, end = move(">", [r,c], df[r], end)
-        positions.append([r, c, direction])
-        direction = "V"
-    if direction == "V" and not end:
-        r, end = move("V", [r,c], df[c], end)
-        positions.append([r, c, direction])
-        direction = "<"
-    if direction == "<" and not end:
-        c, end = move("<", [r,c], df[r], end)
-        positions.append([r, c, direction])
-        direction = "^"
- 
-locations = [start_pos]
-for pos in positions:
-    c2 = pos[1]
-    r2 = pos[0]
-    c1 = locations[-1][1]
-    r1 = locations[-1][0]
+    if direction == "^":
+        while (r >= 0):
+            if r == 0:
+                end = True
+                break
+            next_step = df.loc[r-1, c] != "#"
+            if next_step:
+                r -= 1
+                current_pos = [r, c]
+                positions.append(current_pos)
+            else:
+                direction = change_dir(direction)
+                break
 
-    if c2 > c1:
-        for c in range(c2 - c1):
-            locations.append([r2, c2 - c])
-    if c1 > c2:
-        for c in range(c1 - c2):
-            locations.append([r2, c1 - c])
-#
-    if r2 > r1:
-        for r in range(r2 - r1):
-            locations.append([r2 - r, c2])
-    if r1 > r2:
-        for r in range(r1 - r2):
-            locations.append([r1 - r, c2])
-loc_df = pd.DataFrame(locations).drop_duplicates()
-print(loc_df)
-print(loc_df.shape)
-# print(locations)
+    elif direction == ">":
+        while (c <= ncols - 1):
+            if c == ncols - 1:
+                end = True
+                break
+            next_step = df.loc[r, c+1] != "#"
+            if next_step:
+                c += 1
+                current_pos = [r, c]
+                positions.append(current_pos)
+            else:
+                direction = change_dir(direction)
+                break
 
+    elif direction == "V":
+        while (r <= nrows - 1):
+            if r == nrows - 1:
+                end = True
+                break
+            next_step = df.loc[r+1, c] != "#"
+            if next_step:
+                r += 1
+                current_pos = [r, c]
+                positions.append(current_pos)
+            else:
+                direction = change_dir(direction)
+                break
+
+
+    elif direction == "<":
+        while (c >= 0):
+            if c == 0:
+                end = True
+                break
+            next_step = df.loc[r, c-1] != "#"
+            if next_step:
+                c -= 1
+                current_pos = [r, c]
+                positions.append(current_pos)
+            else:
+                direction = change_dir(direction)
+                break
+
+
+print("Done")
+print("There are {} unique positions".format(pd.DataFrame(positions).drop_duplicates().shape[0]))
+end = time.time()
+print("The time of execution of above program is :",
+      (end-start) * 10**3, "ms")
