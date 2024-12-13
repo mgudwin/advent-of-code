@@ -3,8 +3,8 @@ import time
 # record start time
 start = time.time()
 
-# file = "Inputs/day6_example.txt"
-file = "Inputs/day6_input.txt"
+file = "Inputs/day6_example.txt"
+# file = "Inputs/day6_input.txt"
 with open(file, 'r') as file:
     matrix = []
     for line in file:
@@ -118,3 +118,16 @@ print("There are {} unique positions".format(pd.DataFrame(positions).drop_duplic
 end = time.time()
 print("The time of execution of above program is :",
       (end-start) * 10**3, "ms")
+
+# Part 2
+# p1 = r1,c1
+# p2 = (r1+1),c2
+# p3 = (r4-1),c3
+# p4 = (r1-1),(c1-1)
+# if O is one of these and the path crosses in it,
+# or O makes the path cross into it, that will
+# cause a loop
+
+# For each position, add barrier and check if loop
+# if loop if last x positions are repeats
+# if loop, add position to new list
