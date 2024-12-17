@@ -1,54 +1,94 @@
-# For each test value
-class Test:
+import copy
+
+class TestClass:
     def __init__(self):
         self.solution = None
         self.terms = None
-        self.operator_count = None
         self.operators = None
+        self.base = 3
         self.results = []
-
-    def permutations(self):
-        permutation_list = []
-        for i in range(self.operator_count):
-            operator_list = list(format(i,f'0{self.operator_count - 1}b').
-                        replace("0", "+").replace("1", "*"))
-            permutation_list.append(operator_list)
-        return permutation_list
     
-    def evaluate_permutations(self):
+    def produce_operators(self):
+        num_terms = len(self.terms)
+        operator_list = []
+        if self.base == 2:
+            for i in range(2**(num_terms - 1)):
+                operator_list.append(
+                    list(format(i, f'0{num_terms - 1}b').replace(
+                        "0", "+").replace(
+                            "1", "*"
+                        )
+                    )
+                )
+        elif self.base == 3:
+            for i in range(3**(num_terms - 1)):
+                operator_list.append(
+                    list(str(self.convertToTernary(i)[1 - num_terms:]
+                             ).rjust(num_terms - 1, '0').replace(
+                                 "0", "+").replace(
+                                     "1", "*").replace(
+                                         "2", "|"
+                                     )
+                                 )
+                            )
+        return operator_list
+    
+
+    def eval_operations(self):
         result = False
         for operator_group in self.operators:
-            temp = eval(self.terms[0] + str(operator_group[0]) + str(self.terms[1]))
-            for i in range(1, self.operator_count - 1):
-                temp = eval(str(temp) + str(operator_group[i] + str(self.terms[i + 1])))
-            if temp == int(self.solution):
+            terms = copy.deepcopy(self.terms)
+            running_total = int(terms.pop(0))
+            for ix in range(len(terms)):
+                if operator_group[ix] == "+":
+                    running_total = int(running_total) + int(terms.pop(0))
+                elif operator_group[ix] == "*":
+                    running_total = int(running_total) * int(terms.pop(0))
+                elif operator_group[ix] == "|":
+                    running_total = str(running_total) + str(terms.pop(0))
+            if str(running_total) == str(self.solution):
                 result = True
-        return [self.solution, result]
+                break
+        return [self.solution, result, running_total]
 
-    def process_values(self, test_value):
-        self.solution = test_value[0]
-        self.terms = test_value[1]
-        self.operator_count = len(self.terms)
-        self.operators = self.permutations()
-        self.results.append(self.evaluate_permutations())
 
- 
+    def read_value(self, line):
+        self.solution = line[0]
+        self.terms = line[1]
+        self.operators = self.produce_operators()
+        self.results.append(self.eval_operations())
+
+
+    def convertToTernary(self, N):
+        if N == 0:
+            return '0'
+        elif N == 1:
+            return '1'
+        else:
+            return self.convertToTernary(N // 3) + str(N % 3)
+    
+
+
 # file = "Inputs/day7_example.txt"
 file = "Inputs/day7_input.txt"
 
-t = Test()
+
+t = TestClass()
 with open(file, 'r') as file:
     test_vals = []
     correct_vals = []
     for line in file:
         solution, coeffs = line.rstrip().split(":")
         coeffs = coeffs.lstrip().split(" ")
-        t.process_values([solution, coeffs])
+        t.read_value([solution, coeffs])
 
-sum = 0
-for results in t.results:
-    if results[1]:
-        sum += int(results[0])
-
-print(sum)
 print("Done")
+sum = 0
+for test in t.results:
+    solution = int(test[0])
+    correct = test[1]
+    math = int(test[2])
+    if correct:
+        sum += solution
+
+print("Sum is {}".format(sum))
