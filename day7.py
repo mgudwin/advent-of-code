@@ -1,4 +1,7 @@
 import copy
+import time
+start = time.time()
+
 
 class TestClass:
     def __init__(self):
@@ -92,3 +95,9 @@ for test in t.results:
         sum += solution
 
 print("Sum is {}".format(sum))
+
+
+end = time.time()
+print("The time of execution of above program is :",
+      (end-start) * 10**3, "ms")
+
