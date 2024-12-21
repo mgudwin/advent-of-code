@@ -4,7 +4,8 @@ import numpy as np
 # ###########################################################
 # Inputs
 # ###########################################################
-file = "Inputs/day8_example.txt"
+# file = "Inputs/day8_example.txt"
+file = "Inputs/day8_input.txt"
 
 with open(file, 'r') as file:
     matrix = []
@@ -53,23 +54,19 @@ def calculate_antinodes(antenna_locations, df):
                 p21, p12, anode1, anode2 = calc_antinode_locations(p1, p2)
                 try:
                     if df.loc[anode1[0], anode1[1]] == ".":
-                        # df.loc[anode1[0], anode1[1]] = key + "AN"
                         if key in antinote_location:
                             antinote_location[key].append(anode1)
                         else:
                             antinote_location[key] = [anode1]
                 except:
-                    # print("{} out of bounds".format(anode1))
                     continue
                 try:
                     if df.loc[anode2[0], anode2[1]] == ".":
-                        # df.loc[anode2[0], anode2[1]] = key + "AN"
                         if key in antinote_location:
                             antinote_location[key].append(anode2)
                         else:
                             antinote_location[key] = [anode2]
                 except:
-                    # print("{} out of bounds".format(anode2))
                     continue
     return antinote_location
 
@@ -82,12 +79,14 @@ node_locations = calculate_antinodes(antenna_locations, df)
 # ###########################################################
 
 final_array = []
-for key in node_locations:
-    # print("{} has {} locations".format(key, len(np.unique(node_locations[key]))))
-    for location in np.unique(node_locations[key]):
-        print("{} : {}".format(key, location))
-        # final_array.append(location)
 
-# print("There are {} locations total".format(len(final_array)))
-# print("There are {} totally unique locations".format(len(np.unique(final_array))))
-print("Done")
+ant_str_list = []
+for key in node_locations:
+    for ix, location in enumerate((node_locations[key])):
+        ant_str_list.append("{} : {}".format(key, "-".join(np.char.mod('%d', location))))
+
+for ix, p in enumerate(set(ant_str_list)):
+    print("{} - {}".format(ix, p))
+
+print("Done, there are {} unique antinodes".format(len(set(ant_str_list))))
+
