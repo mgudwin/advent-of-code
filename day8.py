@@ -6,6 +6,7 @@ import numpy as np
 # ###########################################################
 # file = "Inputs/day8_example.txt"
 file = "Inputs/day8_input.txt"
+debug_file = "Inputs/day8_debug.txt"
 
 with open(file, 'r') as file:
     matrix = []
@@ -43,8 +44,8 @@ def assemble_list_of_antenna(df):
 
 def check_if_in_bounds(point, num_row, num_col):
     return (
-        ((point[0] >= 0) and (point[0] <= num_col)) and 
-        ((point[1] >= 0) and (point[1] <= num_row))         
+        ((point[0] >= 0) and (point[0] < num_col)) and 
+        ((point[1] >= 0) and (point[1] < num_row))         
         )
 
 def calculate_antinodes(antenna_locations, df):
@@ -80,10 +81,13 @@ node_locations = calculate_antinodes(antenna_locations, df)
 # Post Process
 # ###########################################################
 
+debug_df = df.copy()
+
 unique_list = []
 ant_str_list = []
 for key in node_locations:
     for ix, location in enumerate((node_locations[key])):
+        debug_df.loc[location[0], location[1]] = "#"
         unique_list.append("{}".format("-".join(np.char.mod('%d', location))))
         ant_str_list.append("{} : {}".format(key, "-".join(np.char.mod('%d', location))))
 
@@ -92,4 +96,4 @@ for ix, p in enumerate(set(ant_str_list)):
 
 print("Done, there are {} unique antinodes".format(len(set(ant_str_list))))
 print("There are {} totally unique antinodes".format(len(set(unique_list))))
-
+ 
