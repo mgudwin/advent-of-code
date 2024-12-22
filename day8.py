@@ -80,15 +80,16 @@ node_locations = calculate_antinodes(antenna_locations, df)
 # Post Process
 # ###########################################################
 
-final_array = []
-
+unique_list = []
 ant_str_list = []
 for key in node_locations:
     for ix, location in enumerate((node_locations[key])):
+        unique_list.append("{}".format("-".join(np.char.mod('%d', location))))
         ant_str_list.append("{} : {}".format(key, "-".join(np.char.mod('%d', location))))
 
 for ix, p in enumerate(set(ant_str_list)):
     print("{} - {}".format(ix, p))
 
 print("Done, there are {} unique antinodes".format(len(set(ant_str_list))))
+print("There are {} totally unique antinodes".format(len(set(unique_list))))
 
