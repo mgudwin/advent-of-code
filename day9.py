@@ -77,7 +77,6 @@ class Disk():
             else:
                 if ix - prev_index != 1:
                     # break in sequence
-                    # {'freespace' : 0: { start: , size: }, 1: {}...}
                     size = prev_index - start_index + 1
                     loc_dict['freespace'][str(freespace_num)] = {
                         'start': start_index,
@@ -94,12 +93,11 @@ class Disk():
 
     def better_defrag(self):
         loc_dict = self.index_disk()
-        # print("Dict is\n{}".format(loc_dict))
-        list_of_ids = sorted(list([i for i in loc_dict.keys() if i != '.']))
-        # print("List of ID's are\n{}".format(list_of_ids))
+        list_of_ids = sorted(list([int(i) for i in loc_dict.keys() if i not in
+                                   ['.', 'freespace']]))
+        list_of_ids = [str(i) for i in list_of_ids]
         for id in list_of_ids[::-1]:
             _indicies = loc_dict[id]
-            # print("indicies", _indicies)
             num_blocks = len(_indicies)
             for fs in loc_dict['freespace'].keys():
                 _fs_start = loc_dict['freespace'][fs]['start']
@@ -109,15 +107,11 @@ class Disk():
                     if _fs_start >= _indicies[0]:
                         loc_dict = self.index_disk()
                         break
-                    # print("Freespace found in ",
-                    #       loc_dict['freespace'][fs], _fd_indecies)
-                    # print(self.id_list)
                     # Swap positions
                     for ix, index in enumerate(_indicies):
                         temp = self.id_list[index]
                         self.id_list[index] = '.'
                         self.id_list[_fd_indecies[ix]] = temp
-                    # print(self.id_list)
                     loc_dict = self.index_disk()
                     break
                 loc_dict = self.index_disk()
@@ -129,7 +123,6 @@ class Disk():
             if char == '.':
                 continue
             running_sum += ix * int(char)
-        # print("{} * {} = {}".format(ix, char, ix * int(char)))
         print("Checksum is {}".format(running_sum))
 
 
