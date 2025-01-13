@@ -5,6 +5,9 @@ from copy import deepcopy
 
 from tabulate import tabulate
 
+# from types import CapsuleType
+
+
 # Can only move up, down, left, right
 # trailhead starts at 0 and scored by however many 9s you can reaach from it
 # TODO: Can use tuples instead of list to represent current point and then you
@@ -30,6 +33,7 @@ class Map:
         self.headers = [str(i) for i in range(self.ncols)]
         self.print_map(self.map)
         self.trailheads = self.find_trailheads()
+        self.known_trails = []
 
     def print_map(self, _map):
         """Print out map"""
@@ -55,35 +59,51 @@ class Map:
     def process_trailhead(self, trailhead_loc: list):
         """Process the trailhead"""
         queue = deque()
-        nines = []
-        visited = []
-        visited.append(trailhead_loc)
+        visited = [trailhead_loc]
         queue.append(trailhead_loc)
-        neighbors = []
+        nines = []
         while queue:
+            path = []
             curr_point = queue.popleft()
             curr_value = self.map[curr_point[0]][curr_point[1]]
-            neighbors = self.get_neighbors(curr_point)
-            # print(neighbors)
-            for neighbor in neighbors:
-                # print("Processing neighbor", neighbor)
+            path.append(f"{curr_point}-{curr_value}")
+            for neighbor in self.get_neighbors(curr_point):
                 neighbor_value = self.map[neighbor[0]][neighbor[1]]
                 if neighbor_value == curr_value + 1:
+                    path.append(f"{neighbor}-{neighbor_value}")
                     if neighbor_value == 9:
                         nines.append(str(neighbor))
                     if str(neighbor) not in visited:
                         visited.append(neighbor)
                         queue.append(neighbor)
         nines = list(set(nines))
-        print(f"These are the visited locations\n{visited}\n")
         return nines
+
+    def trailhead_dfs(self, node: tuple, visited: list, end: int, path: list):
+        """This is a dfs implementation"""
+        node_value = self.map[node[0]][node[1]]
+        visited.append(node)
+        path.append(node)
+        if node_value == end:
+            path_str = ",".join([f"({p[0]}-{p[1]})" for p in path])
+            self.known_trails.append(path_str)
+            path = []
+            return path
+        neighbors = self.get_neighbors(node)
+        if len(neighbors) == 0:
+            path.remove(node)
+            return path
+        for neighbor in self.get_neighbors(node):
+            neighbor_value = self.map[neighbor[0]][neighbor[1]]
+            if neighbor_value == node_value + 1:
+                self.trailhead_dfs(neighbor, visited, end, path)
 
     def get_neighbors(self, current_point):
         """Function to get neighbors for point"""
         neighbors = []
         directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-        for dir in directions:
-            c = [current_point[0] + dir[0], current_point[1] + dir[1]]
+        for direction in directions:
+            c = [current_point[0] + direction[0], current_point[1] + direction[1]]
             if self.check_bounds(c):
                 neighbors.append(c)
         return neighbors
@@ -102,20 +122,23 @@ class Map:
         peaks = []
         score = 0
         for trailhead in self.trailheads:
-            # print("Processing trailhead {}".format(trailhead))
             new_peaks = self.process_trailhead(trailhead)
             _score = len(new_peaks)
-            # print("Score for this trailhead is {}".format(_score))
             peaks += new_peaks
             score += _score
-        # print("There are {} Peaks".format(len(peaks)))
         print(f"Total score is {score}")
-        # print("Here are all the peaks:\n", peaks)
+
+    def process_all_trailheads_dfs(self):
+        """Function to process all trailheads on map"""
+        for trailhead in self.trailheads:
+            self.trailhead_dfs(node=trailhead, visited=[], end=9, path=[])
+        self.known_trails = list(set(self.known_trails))
+        print(f"Total number of trails are {len(self.known_trails)}")
 
 
-# INPUT_FILE = "Inputs/day10_input.txt"
-INPUT_FILE = "Inputs/day10_example.txt"
+INPUT_FILE = "Inputs/day10_input.txt"
+# INPUT_FILE = "Inputs/day10_example.txt"
 my_map = Map(INPUT_FILE)
-my_map.print_trailhead_list()
-# print(map.process_trailhead([0, 2]))
-my_map.process_all_trailheads()
+# my_map.print_trailhead_list()
+my_map.process_all_trailheads_dfs()
+# my_map.process_all_trailheads()
