@@ -1,29 +1,31 @@
-import itertools
+"""Imports"""
+
+import copy
 import math
+from collections import defaultdict
 
 
 class Stones:
     """This class represents the pluto stones"""
 
     def __init__(self, file) -> None:
-        self.stone_list = self.read_stones(file)
-        self.memoize_bitch = {}
+        self.stone_dict = self.read_stones_to_dict(file)
+        self.memoized_dict = defaultdict(int)
 
-    def read_stones(self, file):
+    def read_stones_to_dict(self, file):
         """Read stones"""
+        d = defaultdict(int)
         with open(file, "r", encoding="utf-8") as _file:
             contents = _file.read()
-        return [int(s) for s in contents.split(" ")]
+        for stone in [int(s) for s in contents.split(" ")]:
+            d[stone] = 1
+        return d
 
-    def print_stone_list(self):
+    def print_stones(self):
         """Print that shit"""
         print("Stones are:")
-        for num, stone in enumerate(self.stone_list):
-            print(f"Stone: {num}\t{stone}")
-
-    def print_stone_count(self):
-        """Lists are too long"""
-        print(f"There are {len(self.stone_list)} stones")
+        for key in self.stone_dict:
+            print(f"Stone: {key:<30} : {self.stone_dict[key]}")
 
     def evaluate_stone(self, stone):
         """Process rules"""
@@ -40,27 +42,39 @@ class Stones:
 
     def blink(self):
         """During blink, process rules for each stone"""
-        new_stones = []
-        for stone in self.stone_list:
-            if stone == 0:
-                new_stones.extend([1])
-            elif stone in self.memoize_bitch:
-                new_stones.extend(self.memoize_bitch[stone])
+        d = copy.deepcopy(self.stone_dict)
+        for key in copy.deepcopy(d):
+            _count = d[key]
+            if self.memoized_dict[key]:
+                for _stone in self.memoized_dict[key]:
+                    d[_stone] += _count
             else:
-                new_stone = self.evaluate_stone(stone)
-                new_stones.extend(new_stone)
-                self.memoize_bitch[stone] = new_stone
-        self.stone_list = new_stones
+                for _stone in self.evaluate_stone(key):
+                    d[_stone] += _count
+            if d[key] == _count:
+                del d[key]
+            else:
+                d[key] -= _count
+            # d[key] -= _count
+        self.stone_dict = d
+
+    def sum_stones(self):
+        """Get sum"""
+        _sum = 0
+        for key in self.stone_dict:
+            _sum += self.stone_dict[key]
+        print(f"There are now {_sum} stones")
+
+    def process_blinks(self, blink_count, debug_output):
+        """Combined"""
+        for i in range(blink_count + 1):
+            print(f"==================================\nAfter blink: {i}")
+            self.blink()
+            self.sum_stones()
+            if debug_output:
+                self.print_stones()
 
 
-# pluto = Stones("Inputs/day11_input.txt")
-pluto = Stones("Inputs/day11_example.txt")
-pluto.print_stone_list()
-# for i in range(1, 7):
-for i in range(1, 76):
-    print()
-    print("==================================")
-    print(f"After blink: {i}\n\n")
-    pluto.blink()
-    # pluto.print_stone_list()
-    pluto.print_stone_count()
+pluto = Stones("Inputs/day11_input.txt")
+# pluto = Stones("Inputs/day11_example.txt")
+pluto.process_blinks(blink_count=75, debug_output=False)
