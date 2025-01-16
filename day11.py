@@ -43,19 +43,14 @@ class Stones:
     def blink(self):
         """During blink, process rules for each stone"""
         d = copy.deepcopy(self.stone_dict)
-        for key in copy.deepcopy(d):
-            _count = d[key]
-            if self.memoized_dict[key]:
-                for _stone in self.memoized_dict[key]:
-                    d[_stone] += _count
-            else:
-                for _stone in self.evaluate_stone(key):
-                    d[_stone] += _count
+        for key in self.stone_dict:
+            _count = self.stone_dict[key]
+            for _stone in self.evaluate_stone(key):
+                d[_stone] += _count
             if d[key] == _count:
                 del d[key]
             else:
                 d[key] -= _count
-            # d[key] -= _count
         self.stone_dict = d
 
     def sum_stones(self):
@@ -67,7 +62,7 @@ class Stones:
 
     def process_blinks(self, blink_count, debug_output):
         """Combined"""
-        for i in range(blink_count + 1):
+        for i in range(1, blink_count + 1):
             print(f"==================================\nAfter blink: {i}")
             self.blink()
             self.sum_stones()
