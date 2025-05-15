@@ -63,13 +63,14 @@ class Stones:
     def process_blinks(self, blink_count, debug_output):
         """Combined"""
         for i in range(1, blink_count + 1):
-            print(f"==================================\nAfter blink: {i}")
+            # print(f"==================================\nAfter blink: {i}")
             self.blink()
-            self.sum_stones()
+            # self.sum_stones()
             if debug_output:
                 self.print_stones()
+        self.sum_stones()
 
 
 pluto = Stones("Inputs/day11_input.txt")
 # pluto = Stones("Inputs/day11_example.txt")
-pluto.process_blinks(blink_count=75, debug_output=False)
+pluto.process_blinks(blink_count=10000, debug_output=False)
